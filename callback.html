@@ -24,8 +24,12 @@
   (function () {
     var q = new URLSearchParams(location.search);
     var state = q.get('state') || '';
-    var m = state.match(/~([A-Za-z0-9.-]+(?::\d{2,5})?)$/);
-    var host = m ? m[1] : 'localhost:5161';
+    var m = state.match(/~([A-Za-z0-9.-]+)(?::(\d{2,5}))?$/);
+    // Only ever forward to AMP's own machines: the office server or a developer's own PC.
+    var allowed = ['localhost', '127.0.0.1', 'amp-server', 'amp-server.local'];
+    var name = m ? m[1].toLowerCase() : 'localhost';
+    if (allowed.indexOf(name) < 0) { name = 'localhost'; }
+    var host = name + ':' + (m && m[2] ? m[2] : '5161');
     var target = 'http://' + host + '/api/qb/callback?' + q.toString();
     document.getElementById('msg').innerHTML = 'If you are not taken back automatically, <a href="' + target.replace(/"/g, '&quot;') + '">click here</a>.';
     location.replace(target);
